@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+
+	<AddIn Type="Command">
+		<Name>Place One Between Two Points</Name>
+		<Assembly>"C:\ProgramData\ETools\ETools.Placement.dll"</Assembly>
+		<AddInId>1d2d8fc5-0b5f-4f30-9d77-f71d6605a712</AddInId>
+		<FullClassName>ETools.Placement.PlaceOneBetweenTwoPoints</FullClassName>
+		<VendorId>EvgeniiB</VendorId>
+		<VendorDescription>Evgenii Burlakov</VendorDescription>
+	</AddIn>
+
+
+	<AddIn Type="Command">
+		<Name>Place Array Between Two Points</Name>
+		<Assembly>"C:\ProgramData\ETools\ETools.Placement.dll"</Assembly>
+		<AddInId>3f0be6e7-f5e7-4997-8e23-9140f840a51b</AddInId>
+		<FullClassName>ETools.Placement.PlaceArrayBetweenTwoPoints</FullClassName>
+		<VendorId>EvgeniiB</VendorId>
+		<VendorDescription>Evgenii Burlakov</VendorDescription>
+	</AddIn>
+</RevitAddIns>
