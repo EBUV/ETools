@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35431.28
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETools.ReassignCircuits", "ETools.ReassignCircuits\ETools.ReassignCircuits.csproj", "{A1A8838F-39F8-4921-8B9A-9A7A26EABCC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETools.Placement", "ETools.Placement\ETools.Placement.csproj", "{BAE48CB5-D134-4A76-B434-61A00C268D3A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1A8838F-39F8-4921-8B9A-9A7A26EABCC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1A8838F-39F8-4921-8B9A-9A7A26EABCC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1A8838F-39F8-4921-8B9A-9A7A26EABCC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1A8838F-39F8-4921-8B9A-9A7A26EABCC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAE48CB5-D134-4A76-B434-61A00C268D3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAE48CB5-D134-4A76-B434-61A00C268D3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAE48CB5-D134-4A76-B434-61A00C268D3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAE48CB5-D134-4A76-B434-61A00C268D3A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3267BE21-EC70-4746-9F27-6C59AAA30898}
+	EndGlobalSection
+EndGlobal
