@@ -1,9 +1,9 @@
 ﻿<RevitAddIns>
   <AddIn Type="Application">
-    <Name>ETools</Name>
-    <Assembly>"C:\ProgramData\ETools\ETools.dll"</Assembly>
+    <Name>ETools.ReassignCircuits</Name>
+    <Assembly>"C:\ProgramData\ETools\ETools.ReassignCircuits.dll"</Assembly>
     <AddInId>6D7DAA66-C4D1-4E65-9EF5-EDE017A0C456</AddInId>
-    <FullClassName>ETools.App</FullClassName>
+    <FullClassName>ETools.ReassignCircuits.App</FullClassName>
     <VendorId>EvgeniiB</VendorId>
     <VendorDescription>Evgenii Burlakov</VendorDescription>
   </AddIn>

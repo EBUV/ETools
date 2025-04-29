@@ -25,7 +25,9 @@ namespace ETools.Placement
                 // Create default settings file
                 settingsDoc = new XDocument(
                     new XElement("Settings",
+                        new XElement("ShowTip_SelectElement_Single", "true"),
                         new XElement("ShowTip_SinglePlace", "true"),
+                        new XElement("ShowTip_SelectElement_Array", "true"),
                         new XElement("ShowTip_ArrayPlace", "true")
                     )
                 );

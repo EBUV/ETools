@@ -27,7 +27,12 @@ namespace ETools.Placement
             {
                 if (selectedIds.Count == 0)
                 {
-                    TaskDialog.Show("Select Element", "Please select an element to copy.");
+                    if (SettingsManager.GetBool("ShowTip_SelectElement_Single"))
+                    {
+                        TipDialog tip = new TipDialog("Please select an element to copy.", "ShowTip_SelectElement_Single");
+                        tip.ShowDialog();
+                    }
+
                     selId = uidoc.Selection.PickObject(ObjectType.Element, "Select an element to copy").ElementId;
                 }
                 else

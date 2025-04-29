@@ -25,14 +25,25 @@ namespace ETools.Placement
 
             try
             {
-                // Select the base element to be copied
-                selId = selectedIds.Count == 0
-                    ? uidoc.Selection.PickObject(ObjectType.Element, "Select an element to copy").ElementId
-                    : selectedIds.First();
+                if (selectedIds.Count == 0)
+                {
+                    if (SettingsManager.GetBool("ShowTip_ArrayPlace"))
+                    {
+                        TipDialog tip = new TipDialog("Please select an element to copy.", "ShowTip_ArrayPlace");
+                        tip.ShowDialog();
+                    }
+                    selId = uidoc.Selection.PickObject(ObjectType.Element, "Select an element to copy").ElementId;
+                }
+                else
+                {
+                    selId = selectedIds.First();
+                }
 
                 selectedElement = doc.GetElement(selId);
                 Location location = selectedElement.Location;
                 XYZ basePoint = (location as LocationPoint).Point;
+
+
 
                 // Show input dialog
                 ArrayInputDialog dialog = new ArrayInputDialog();
@@ -40,6 +51,13 @@ namespace ETools.Placement
                 {
                     return Result.Cancelled;
                 }
+
+                if (SettingsManager.GetBool("ShowTip_ArrayPlace"))
+                {
+                    TipDialog tip = new TipDialog("You will now select two points that define the placement bounds.", "ShowTip_ArrayPlace");
+                    tip.ShowDialog();
+                }
+
 
                 int columns = dialog.Columns;
                 int rows = dialog.Rows;

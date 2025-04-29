@@ -10,12 +10,6 @@ namespace ETools.Placement
         public ArrayInputDialog()
         {
             InitializeComponent();
-
-            // Hide the checkbox if the user already disabled it
-            if (!SettingsManager.GetBool("ShowTip_ArrayPlace"))
-            {
-                DoNotShowAgainCheckBox.Visibility = Visibility.Collapsed;
-            }
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)
@@ -34,11 +28,6 @@ namespace ETools.Placement
 
             Columns = cols;
             Rows = rows;
-
-            if (DoNotShowAgainCheckBox.IsChecked == true)
-            {
-                SettingsManager.SetBool("ShowTip_ArrayPlace", false);
-            }
 
             this.DialogResult = true;
         }

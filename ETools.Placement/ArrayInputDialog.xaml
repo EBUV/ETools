@@ -9,12 +9,10 @@
                        Text="After clicking OK, you will select two corner points that define the array." />
 
             <TextBlock Text="Number of Columns:"/>
-            <TextBox x:Name="ColumnsTextBox" Text="1" Margin="0,0,0,10"/>
+            <TextBox x:Name="ColumnsTextBox" Text="2" Margin="0,0,0,10"/>
 
             <TextBlock Text="Number of Rows:"/>
-            <TextBox x:Name="RowsTextBox" Text="1" Margin="0,0,0,10"/>
-
-            <CheckBox x:Name="DoNotShowAgainCheckBox" Content="Don't show this message again" Margin="0,0,0,10"/>
+            <TextBox x:Name="RowsTextBox" Text="2" Margin="0,0,0,10"/>
 
             <Button Content="OK" Width="80" HorizontalAlignment="Right" Click="OK_Click"/>
         </StackPanel>

@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Windows.Media.Imaging;
 
 namespace ETools
 {
@@ -28,19 +29,21 @@ namespace ETools
                 assemblyPath,
                 "ETools.PanelReassignCommand");
 
-
-
             PushButton button = panel.AddItem(buttonData) as PushButton;
 
             // Load icon
             string iconPath = Path.Combine(Path.GetDirectoryName(assemblyPath), "ReassignCircuits.png");
             if (File.Exists(iconPath))
             {
-                button.LargeImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(iconPath));
+                button.LargeImage = new BitmapImage(new Uri(iconPath, UriKind.Absolute));
             }
 
             // Tooltip
             button.ToolTip = "Reassign selected electrical circuits to another panel.";
+
+            // F1 Help URL (должен вести на хостинг справки — можно GitHub Pages)
+            ContextualHelp help = new ContextualHelp(ContextualHelpType.Url, "https://ebuv.github.io/etools-privacy/help-reassign.html");
+            button.SetContextualHelp(help);
 
             return Result.Succeeded;
         }
