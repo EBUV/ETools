@@ -2,7 +2,7 @@
   <AddIn Type="Application">
     <Name>ETools.ReassignCircuits</Name>
     <Assembly>"C:\ProgramData\ETools\ETools.ReassignCircuits.dll"</Assembly>
-    <AddInId>6D7DAA66-C4D1-4E65-9EF5-EDE017A0C456</AddInId>
+    <AddInId>AF3C5CF4-6EF7-4101-A105-1A9ED501F3DF</AddInId>
     <FullClassName>ETools.ReassignCircuits.App</FullClassName>
     <VendorId>EvgeniiB</VendorId>
     <VendorDescription>Evgenii Burlakov</VendorDescription>

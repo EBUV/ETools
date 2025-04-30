@@ -3,9 +3,9 @@
 	<AddIn Type="Application">
 		<Name>ETools.Placement</Name>
 		<Assembly>"C:\ProgramData\ETools\ETools.Placement.dll"</Assembly>
-		<AddInId>2E395B1D-5FA6-4A62-8B3E-8F9AD4D3C789</AddInId>
+		<AddInId>FD37613B-4F9C-4354-A99A-5C48658EC5EB</AddInId>
 		<FullClassName>ETools.Placement.App</FullClassName>
-		<VendorId>Evgenii B</VendorId>
+		<VendorId>EvgeniiB</VendorId>
 		<VendorDescription>Evgenii Burlakov</VendorDescription>
 	</AddIn>
 </RevitAddIns>

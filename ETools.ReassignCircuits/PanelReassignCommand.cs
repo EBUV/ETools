@@ -22,8 +22,10 @@ namespace ETools
             ICollection<ElementId> selectedIds = selection.GetElementIds();
             if (selectedIds.Count == 0)
             {
-                message = "No elements selected.";
-                return Result.Failed;
+                TaskDialog.Show("Reassign Circuits",
+                    "Please select one or more elements that belong to electrical circuits, "
+                    + "or select circuits directly from the System Browser, before running this tool.");
+                return Result.Cancelled;
             }
 
             List<ElectricalSystem> elSystems = ExtractElectricalSystemsFromSelection(doc, selectedIds);
