@@ -7,7 +7,7 @@ namespace ETools.Placement
     public static class SettingsManager
     {
         private static readonly string folderPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
             "ETools");
 
         private static readonly string settingsFilePath = Path.Combine(folderPath, "settings.xml");
