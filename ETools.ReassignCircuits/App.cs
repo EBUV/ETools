@@ -13,37 +13,59 @@ namespace ETools
             string tabName = "ETools";
             string panelName = "Circuits";
 
-            // Try to create ribbon tab
+            // Создать вкладку, если нет
             try { application.CreateRibbonTab(tabName); } catch { }
 
-            // Create ribbon panel
+            // Создать панель
             RibbonPanel panel = application.CreateRibbonPanel(tabName, panelName);
 
-            // Path to this assembly
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
+            string baseDir = Path.GetDirectoryName(assemblyPath);
 
-            // Create button data
-            PushButtonData buttonData = new PushButtonData(
+            // --- Кнопка Reassign ---
+            PushButtonData reassignData = new PushButtonData(
                 "ReassignCircuits",
                 "Reassign",
                 assemblyPath,
                 "ETools.PanelReassignCommand");
+            PushButton reassignButton = panel.AddItem(reassignData) as PushButton;
 
-            PushButton button = panel.AddItem(buttonData) as PushButton;
+            string iconReassign = Path.Combine(baseDir, "ReassignCircuits.png");
+            if (File.Exists(iconReassign))
+                reassignButton.LargeImage = new BitmapImage(new Uri(iconReassign, UriKind.Absolute));
+            reassignButton.ToolTip = "Reassign selected electrical circuits to another panel.";
+            reassignButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url,
+                "https://ebuv.github.io/etools-privacy/help-reassign.html"));
 
-            // Load icon
-            string iconPath = Path.Combine(Path.GetDirectoryName(assemblyPath), "ReassignCircuits.png");
-            if (File.Exists(iconPath))
-            {
-                button.LargeImage = new BitmapImage(new Uri(iconPath, UriKind.Absolute));
-            }
+            // --- Кнопка Move Up ---
+            PushButtonData moveUpData = new PushButtonData(
+                "MoveCircuitsUp",
+                "Move Up",
+                assemblyPath,
+                "ETools.MoveCircuitsUp");
+            PushButton moveUpButton = panel.AddItem(moveUpData) as PushButton;
 
-            // Tooltip
-            button.ToolTip = "Reassign selected electrical circuits to another panel.";
+            string iconUp = Path.Combine(baseDir, "MoveCircuitsUp.png");
+            if (File.Exists(iconUp))
+                moveUpButton.LargeImage = new BitmapImage(new Uri(iconUp, UriKind.Absolute));
+            moveUpButton.ToolTip = "Move selected circuit up (N-).";
+            moveUpButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url,
+                "https://ebuv.github.io/etools-privacy/help-movecircuitsup.html"));
 
-            // F1 Help URL (должен вести на хостинг справки — можно GitHub Pages)
-            ContextualHelp help = new ContextualHelp(ContextualHelpType.Url, "https://ebuv.github.io/etools-privacy/help-reassign.html");
-            button.SetContextualHelp(help);
+            // --- Кнопка Move Down ---
+            PushButtonData moveDownData = new PushButtonData(
+                "MoveCircuitsDown",
+                "Move Down",
+                assemblyPath,
+                "ETools.MoveCircuitsDown");
+            PushButton moveDownButton = panel.AddItem(moveDownData) as PushButton;
+
+            string iconDown = Path.Combine(baseDir, "MoveCircuitsDown.png");
+            if (File.Exists(iconDown))
+                moveDownButton.LargeImage = new BitmapImage(new Uri(iconDown, UriKind.Absolute));
+            moveDownButton.ToolTip = "Move selected circuit down (N+).";
+            moveDownButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url,
+                "https://ebuv.github.io/etools-privacy/help-movecircuitsdown.html"));
 
             return Result.Succeeded;
         }
