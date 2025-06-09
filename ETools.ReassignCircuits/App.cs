@@ -36,7 +36,7 @@ namespace ETools
             reassignButton.ToolTip = "Reassign selected electrical circuits to another panel.";
             reassignButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url,
                 "https://ebuv.github.io/etools-privacy/help-reassign.html"));
-
+            /*
             // --- Кнопка Move Up ---
             PushButtonData moveUpData = new PushButtonData(
                 "MoveCircuitsUp",
@@ -66,7 +66,7 @@ namespace ETools
             moveDownButton.ToolTip = "Move selected circuit down (N+).";
             moveDownButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url,
                 "https://ebuv.github.io/etools-privacy/help-movecircuitsdown.html"));
-
+            */
             return Result.Succeeded;
         }
 

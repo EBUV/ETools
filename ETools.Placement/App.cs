@@ -36,6 +36,10 @@ namespace ETools.Placement
             // Путь к текущей DLL
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
 
+            // Ссылка на HTML-файл помощи
+            string helpUrl = "https://ebuv.github.io/etools-privacy/Help-Placement.html";
+            ContextualHelp help = new ContextualHelp(ContextualHelpType.Url, helpUrl);
+
             // Кнопка 1 — одиночный объект
             PushButtonData button1 = new PushButtonData(
                 "PlaceOne",
@@ -44,6 +48,7 @@ namespace ETools.Placement
                 "ETools.Placement.PlaceOneBetweenTwoPoints");
             button1.ToolTip = "Place one element centered between two picked points.";
             button1.LargeImage = LoadImage("PlaceOneIcon_32.png");
+            button1.SetContextualHelp(help);
 
             // Кнопка 2 — массив
             PushButtonData button2 = new PushButtonData(
@@ -53,7 +58,9 @@ namespace ETools.Placement
                 "ETools.Placement.PlaceArrayBetweenTwoPoints");
             button2.ToolTip = "Place an array of elements between two picked points.";
             button2.LargeImage = LoadImage("PlaceArrayIcon_32.png");
+            button2.SetContextualHelp(help);
 
+            // Добавляем кнопки на панель
             panel.AddItem(button1);
             panel.AddItem(button2);
 
