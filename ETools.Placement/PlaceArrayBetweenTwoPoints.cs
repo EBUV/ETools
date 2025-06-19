@@ -1,10 +1,8 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace ETools.Placement
@@ -19,12 +17,32 @@ namespace ETools.Placement
             Document doc = uidoc.Document;
             Selection selection = uidoc.Selection;
 
-            ICollection<ElementId> selectedIds = selection.GetElementIds();
             Element selectedElement;
             ElementId selId;
 
             try
             {
+                View view = doc.ActiveView;
+
+                // Set work plane if not set
+                if (view.SketchPlane == null)
+                {
+                    using (Transaction t = new Transaction(doc, "Set Work Plane"))
+                    {
+                        t.Start();
+                        double elevation = 0;
+                        if (view.GenLevel != null)
+                            elevation = view.GenLevel.Elevation;
+
+                        Plane plane = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, elevation));
+                        SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
+                        view.SketchPlane = sketchPlane;
+                        t.Commit();
+                    }
+                }
+
+                // Element selection
+                var selectedIds = selection.GetElementIds();
                 if (selectedIds.Count == 0)
                 {
                     if (SettingsManager.GetBool("ShowTip_ArrayPlace"))
@@ -40,12 +58,14 @@ namespace ETools.Placement
                 }
 
                 selectedElement = doc.GetElement(selId);
-                Location location = selectedElement.Location;
-                XYZ basePoint = (location as LocationPoint).Point;
+                if (!(selectedElement.Location is LocationPoint locationPoint))
+                {
+                    message = "Selected element must have a location point.";
+                    return Result.Failed;
+                }
+                XYZ basePoint = locationPoint.Point;
 
-
-
-                // Show input dialog
+                // Input dialog
                 ArrayInputDialog dialog = new ArrayInputDialog();
                 if (dialog.ShowDialog() != true)
                 {
@@ -58,11 +78,20 @@ namespace ETools.Placement
                     tip.ShowDialog();
                 }
 
-
                 int columns = dialog.Columns;
                 int rows = dialog.Rows;
 
-                // Loop until user presses ESC
+                // Check for excessive element count
+                int maxElements = 1000;
+                if (rows * columns > maxElements)
+                {
+                    TaskDialog.Show("Too many elements",
+                        $"You are trying to place {rows * columns} elements.\n" +
+                        $"The maximum allowed is {maxElements}.");
+                    return Result.Cancelled;
+                }
+
+                // Main loop
                 while (true)
                 {
                     try
@@ -89,7 +118,8 @@ namespace ETools.Placement
                                 {
                                     XYZ colOffset = dirX * ((x + 0.5) * stepX);
                                     XYZ target = pointA + rowOffset + colOffset;
-                                    XYZ move = new XYZ(target.X - basePoint.X, target.Y - basePoint.Y, 0);
+
+                                    XYZ move = target - basePoint;
                                     ElementTransformUtils.CopyElement(doc, selId, move);
                                 }
                             }
@@ -98,7 +128,7 @@ namespace ETools.Placement
                     }
                     catch (Autodesk.Revit.Exceptions.OperationCanceledException)
                     {
-                        break; // Exit loop on ESC
+                        break;
                     }
                     catch (Exception ex)
                     {
