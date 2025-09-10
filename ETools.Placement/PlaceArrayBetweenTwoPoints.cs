@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ETools.Placement
@@ -17,31 +18,10 @@ namespace ETools.Placement
             Document doc = uidoc.Document;
             Selection selection = uidoc.Selection;
 
-            Element selectedElement;
-            ElementId selId;
-
             try
             {
-                View view = doc.ActiveView;
-
-                // Set work plane if not set
-                if (view.SketchPlane == null)
-                {
-                    using (Transaction t = new Transaction(doc, "Set Work Plane"))
-                    {
-                        t.Start();
-                        double elevation = 0;
-                        if (view.GenLevel != null)
-                            elevation = view.GenLevel.Elevation;
-
-                        Plane plane = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, elevation));
-                        SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
-                        view.SketchPlane = sketchPlane;
-                        t.Commit();
-                    }
-                }
-
-                // Element selection
+                // --- Выбор исходного элемента
+                ElementId selId;
                 var selectedIds = selection.GetElementIds();
                 if (selectedIds.Count == 0)
                 {
@@ -57,18 +37,31 @@ namespace ETools.Placement
                     selId = selectedIds.First();
                 }
 
-                selectedElement = doc.GetElement(selId);
+                Element selectedElement = doc.GetElement(selId);
                 if (!(selectedElement.Location is LocationPoint locationPoint))
                 {
                     message = "Selected element must have a location point.";
                     return Result.Failed;
                 }
-                XYZ basePoint = locationPoint.Point;
 
-                // Input dialog
+                // Базовая точка исходника (сохраняем Z!)
+                XYZ basePoint3d = locationPoint.Point;
+
+                // --- Ввод параметров массива
                 ArrayInputDialog dialog = new ArrayInputDialog();
                 if (dialog.ShowDialog() != true)
+                    return Result.Cancelled;
+
+                int columns = dialog.Columns;
+                int rows = dialog.Rows;
+
+                // Ограничение на кол-во копий
+                int maxElements = 1000;
+                int total = rows * columns;
+                if (total > maxElements)
                 {
+                    TaskDialog.Show("Too many elements",
+                        $"You are trying to place {total} elements.\nThe maximum allowed is {maxElements}.");
                     return Result.Cancelled;
                 }
 
@@ -78,57 +71,70 @@ namespace ETools.Placement
                     tip.ShowDialog();
                 }
 
-                int columns = dialog.Columns;
-                int rows = dialog.Rows;
-
-                // Check for excessive element count
-                int maxElements = 1000;
-                if (rows * columns > maxElements)
-                {
-                    TaskDialog.Show("Too many elements",
-                        $"You are trying to place {rows * columns} elements.\n" +
-                        $"The maximum allowed is {maxElements}.");
-                    return Result.Cancelled;
-                }
-
-                // Main loop
+                // --- Основной цикл
                 while (true)
                 {
                     try
                     {
+                        // Прямоугольная область по двум углам
                         XYZ pointA = selection.PickPoint(ObjectSnapTypes.Intersections, "Pick first corner");
                         XYZ pointB = selection.PickPoint(ObjectSnapTypes.Intersections, "Pick opposite corner");
 
-                        XYZ pointA2 = new XYZ(pointA.X, pointB.Y, pointA.Z);
-                        XYZ pointB2 = new XYZ(pointB.X, pointA.Y, pointB.Z);
+                        // Векторы сторон прямоугольника в плоскости XY текущего вида
+                        XYZ aToA2 = new XYZ(0, pointB.Y - pointA.Y, 0);
+                        XYZ aToB2 = new XYZ(pointB.X - pointA.X, 0, 0);
 
-                        double stepY = pointA.DistanceTo(pointA2) / rows;
-                        double stepX = pointA.DistanceTo(pointB2) / columns;
+                        double lenY = aToA2.GetLength();
+                        double lenX = aToB2.GetLength();
 
-                        XYZ dirY = (pointA2 - pointA).Normalize();
-                        XYZ dirX = (pointB2 - pointA).Normalize();
+                        if (lenX < 1e-9 || lenY < 1e-9)
+                        {
+                            TaskDialog.Show("Warning", "Rectangle side is too small.");
+                            continue;
+                        }
+
+                        XYZ dirY = aToA2.Normalize(); // «вверх»
+                        XYZ dirX = aToB2.Normalize(); // «вправо»
+
+                        double stepY = lenY / rows;
+                        double stepX = lenX / columns;
 
                         using (Transaction t = new Transaction(doc, "Place Array Between Two Points"))
                         {
                             t.Start();
+
+                            var ids = new List<ElementId> { selId };
+
                             for (int y = 0; y < rows; y++)
                             {
                                 XYZ rowOffset = dirY * ((y + 0.5) * stepY);
                                 for (int x = 0; x < columns; x++)
                                 {
                                     XYZ colOffset = dirX * ((x + 0.5) * stepX);
-                                    XYZ target = pointA + rowOffset + colOffset;
 
-                                    XYZ move = target - basePoint;
-                                    ElementTransformUtils.CopyElement(doc, selId, move);
+                                    // Целевая точка центра ячейки (XY по прямоугольнику, Z — как у исходника)
+                                    XYZ targetXY = pointA + rowOffset + colOffset;
+                                    XYZ target = new XYZ(targetXY.X, targetXY.Y, basePoint3d.Z);
+
+                                    // Вектор смещения от исходного экземпляра
+                                    XYZ move = target - basePoint3d;
+
+                                    // КЛЮЧ: doc->doc перегрузка без контекста вида
+                                    ElementTransformUtils.CopyElements(
+                                        doc,                              // sourceDoc
+                                        ids,                              // что копируем
+                                        doc,                              // targetDoc (тот же)
+                                        Transform.CreateTranslation(move),
+                                        new CopyPasteOptions());
                                 }
                             }
+
                             t.Commit();
                         }
                     }
                     catch (Autodesk.Revit.Exceptions.OperationCanceledException)
                     {
-                        break;
+                        break; // ESC — выходим из цикла
                     }
                     catch (Exception ex)
                     {

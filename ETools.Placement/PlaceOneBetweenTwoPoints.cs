@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ETools.Placement
@@ -17,34 +18,10 @@ namespace ETools.Placement
             Document doc = uidoc.Document;
             Selection selection = uidoc.Selection;
 
-            Element selectedElement;
-            ElementId selId;
-
             try
             {
-                View view = doc.ActiveView;
-
-                if (view.SketchPlane == null)
-                {
-                    using (Transaction t = new Transaction(doc, "Set Work Plane"))
-                    {
-                        t.Start();
-
-                        double elevation = 0;
-                        if (view.GenLevel != null)
-                        {
-                            elevation = view.GenLevel.Elevation;
-                        }
-
-                        Plane plane = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, elevation));
-                        SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
-                        view.SketchPlane = sketchPlane;
-
-                        t.Commit();
-                    }
-                }
-
-                // Выбор элемента
+                // 1) Выбор исходного элемента
+                ElementId selId;
                 if (selection.GetElementIds().Count == 0)
                 {
                     if (SettingsManager.GetBool("ShowTip_SelectElement_Single"))
@@ -52,7 +29,6 @@ namespace ETools.Placement
                         TipDialog tip = new TipDialog("Please select an element to copy.", "ShowTip_SelectElement_Single");
                         tip.ShowDialog();
                     }
-
                     selId = selection.PickObject(ObjectType.Element, "Select an element to copy").ElementId;
                 }
                 else
@@ -60,16 +36,15 @@ namespace ETools.Placement
                     selId = selection.GetElementIds().First();
                 }
 
-                selectedElement = doc.GetElement(selId);
-                Location location = selectedElement.Location;
-
-                if (!(location is LocationPoint locationPoint))
+                Element srcElem = doc.GetElement(selId);
+                if (!(srcElem.Location is LocationPoint srcLocPt))
                 {
                     message = "Selected element must have a location point.";
                     return Result.Failed;
                 }
 
-                XYZ basePoint = locationPoint.Point;
+                // Базовая точка исходника (оставляем исходный Z!)
+                XYZ basePoint3d = srcLocPt.Point;
 
                 if (SettingsManager.GetBool("ShowTip_SinglePlace"))
                 {
@@ -81,24 +56,40 @@ namespace ETools.Placement
                 {
                     try
                     {
+                        // 2) Две точки -> середина
                         XYZ pointA = selection.PickPoint(ObjectSnapTypes.Intersections, "Pick first point");
                         XYZ pointB = selection.PickPoint(ObjectSnapTypes.Intersections, "Pick second point");
-
                         XYZ midPoint = pointA + (pointB - pointA) * 0.5;
 
-                        using (Transaction t = new Transaction(doc, "Place Object Between Points"))
+                        // 3) Смещение: переносим только по XY, Z сохраняем как у исходника —
+                        // это уменьшает шанс ре-хостинга и ошибок допустимого диапазона.
+                        XYZ target = new XYZ(midPoint.X, midPoint.Y, basePoint3d.Z);
+                        XYZ offset = target - basePoint3d;
+
+                        using (Transaction t = new Transaction(doc, "Copy element by doc->doc"))
                         {
                             t.Start();
 
-                            XYZ offset = midPoint - basePoint;
-                            ElementTransformUtils.CopyElement(doc, selId, offset);
+                            // !!! ВАЖНО: перегрузка doc->doc, НЕ view->view и НЕ CopyElement(doc, …)
+                            var ids = new List<ElementId> { selId };
+                            var opts = new CopyPasteOptions();
+                            // при необходимости: opts.SetDuplicateTypeNamesHandler(new YourHandler());
+
+                            ICollection<ElementId> newIds =
+                                ElementTransformUtils.CopyElements(
+                                    doc,          // sourceDoc
+                                    ids,          // что копируем
+                                    doc,          // targetDoc (тот же)
+                                    Transform.CreateTranslation(offset),
+                                    opts
+                                );
 
                             t.Commit();
                         }
                     }
                     catch (Autodesk.Revit.Exceptions.OperationCanceledException)
                     {
-                        break;
+                        break; // пользователь нажал ESC
                     }
                     catch (Exception ex)
                     {
